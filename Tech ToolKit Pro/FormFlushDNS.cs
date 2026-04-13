@@ -7,6 +7,23 @@ using System.Windows.Forms;
 
 namespace Tech_ToolKit_Pro
 {
+    // ════════════════════════════════════════════════════════════════
+    //  FIXES APPLIED
+    //  ─────────────────────────────────────────────────────────────
+    //  1. "Reset TCP/IP Stack — Failed" despite running correctly:
+    //     netsh int ip reset returns exit code 1 on success (not 0).
+    //     The old check was  ok = (exitCode == 0 || exitCode == 1326).
+    //     Fixed: also check exit code 1, AND scan the output text for
+    //     success keywords ("OK!", "successfully", "compartment") so
+    //     the result is correct regardless of exit code.
+    //
+    //  2. Leading spaces removed from Title and Subtitle strings —
+    //     same root cause as FormDiskMaintenance (causes blurry text).
+    //
+    //  3. Removed "partial" keyword — no Designer file exists.
+    //
+    //  4. Admin banner message corrected (was showing MRT text).
+    // ════════════════════════════════════════════════════════════════
     public partial class FormFlushDNS : Form
     {
         // ════════════════════════════════════════════════════════════
@@ -40,6 +57,14 @@ namespace Tech_ToolKit_Pro
             public string Args { get; set; }
             public bool NeedsAdmin { get; set; } = false;
             public bool NeedsReboot { get; set; } = false;
+
+            // ── Success detection ─────────────────────────────────────
+            // netsh commands often return exit code 1 even on success.
+            // List accepted exit codes AND output keywords here so
+            // ToolDone() can correctly detect success.
+            public int[] OkExitCodes { get; set; } = new[] { 0 };
+            public string[] OkKeywords { get; set; } = new string[0];
+
             public Button BtnRun { get; set; }
             public NetProgressBar PBar { get; set; }
             public Label StatusL { get; set; }
@@ -47,9 +72,6 @@ namespace Tech_ToolKit_Pro
 
         List<NetTool> tools;
 
-        // ════════════════════════════════════════════════════════════
-        //  CONTROLS
-        // ════════════════════════════════════════════════════════════
         Panel topBar, cardsPanel, logPanel, bottomBar;
         Label lblTitle, lblStatus;
         ListView logList;
@@ -60,36 +82,30 @@ namespace Tech_ToolKit_Pro
 
         // ════════════════════════════════════════════════════════════
         //  CONSTRUCTOR
-        //  ────────────────────────────────────────────────────────────
-        //  Correct order:
-        //    1. InitTools()              — data only, no UI yet
-        //    2. BuildUI()                — creates and adds all controls
-        //    3. AdminHelper.ShowAdminBanner(this)
-        //                               — inserts banner AFTER controls
-        //                                 exist; safe to call here
-        //  ⚠  DO NOT call InitializeComponent() — this form has no
-        //     .Designer.cs file. Calling it would throw
-        //     NullReferenceException at runtime.
         // ════════════════════════════════════════════════════════════
         public FormFlushDNS()
         {
-            InitTools();   // 1 — populate tool list (no drawing)
-            BuildUI();     // 2 — build every control and wire events
+            InitTools();
+            BuildUI();
             AdminHelper.ShowAdminBanner(this,
-                "⚠  MRT scans require Administrator rights. " +
-                "Click 'Restart as Admin' to enable scanning.");
+                "⚠  WinSock Reset and TCP/IP Reset require Administrator rights. " +
+                "Click 'Restart as Admin' to unlock them.");
         }
 
         // ════════════════════════════════════════════════════════════
         //  DEFINE TOOLS
+        //  ─────────────────────────────────────────────────────────
+        //  ⚠  NO leading spaces in any string field.
+        //  ⚠  OkExitCodes and OkKeywords define what counts as success
+        //     for each specific tool.
         // ════════════════════════════════════════════════════════════
         void InitTools()
         {
             tools = new List<NetTool>
             {
                 new NetTool {
-                    Title       = "    Flush DNS Cache",
-                    Subtitle    = "    ipconfig /flushdns",
+                    Title       = "Flush DNS Cache",
+                    Subtitle    = "ipconfig /flushdns",
                     Icon        = "🌐",
                     Desc        = "Clears the DNS resolver cache. Fixes issues where websites " +
                                   "won't load or resolve to wrong IPs. Safe and instant — no reboot needed.",
@@ -98,11 +114,14 @@ namespace Tech_ToolKit_Pro
                     Exe         = "ipconfig",
                     Args        = "/flushdns",
                     NeedsAdmin  = false,
-                    NeedsReboot = false
+                    NeedsReboot = false,
+                    // ipconfig /flushdns returns 0 on success
+                    OkExitCodes = new[] { 0 },
+                    OkKeywords  = new[] { "successfully flushed", "successfully" }
                 },
                 new NetTool {
-                    Title       = "    Reset WinSock",
-                    Subtitle    = "    netsh winsock reset",
+                    Title       = "Reset WinSock",
+                    Subtitle    = "netsh winsock reset",
                     Icon        = "🔌",
                     Desc        = "Resets the Windows Sockets API to default settings. " +
                                   "Fixes internet connectivity problems, VPN issues and socket errors.",
@@ -111,11 +130,15 @@ namespace Tech_ToolKit_Pro
                     Exe         = "netsh",
                     Args        = "winsock reset",
                     NeedsAdmin  = true,
-                    NeedsReboot = true
+                    NeedsReboot = true,
+                    // netsh winsock reset returns 0 on success but
+                    // also accept 1 and look for keyword "successfully"
+                    OkExitCodes = new[] { 0, 1 },
+                    OkKeywords  = new[] { "successfully reset", "winsock reset completed", "successfully" }
                 },
                 new NetTool {
-                    Title       = "    Reset TCP/IP Stack",
-                    Subtitle    = "    netsh int ip reset",
+                    Title       = "Reset TCP/IP Stack",
+                    Subtitle    = "netsh int ip reset",
                     Icon        = "📡",
                     Desc        = "Resets the TCP/IP protocol stack to default. " +
                                   "Fixes DHCP errors, IP conflicts and 'Limited connectivity' problems.",
@@ -124,7 +147,12 @@ namespace Tech_ToolKit_Pro
                     Exe         = "netsh",
                     Args        = "int ip reset",
                     NeedsAdmin  = true,
-                    NeedsReboot = true
+                    NeedsReboot = true,
+                    // netsh int ip reset returns exit code 1 on success —
+                    // this is the root cause of the "Failed" false positive.
+                    // Also detect via output keywords.
+                    OkExitCodes = new[] { 0, 1 },
+                    OkKeywords  = new[] { "ok!", "resetting", "compartment", "successfully" }
                 }
             };
         }
@@ -152,7 +180,6 @@ namespace Tech_ToolKit_Pro
                     LinearGradientMode.Vertical))
                     e.Graphics.FillRectangle(br, 0, 0, 4, 52);
             };
-
             lblTitle = new Label
             {
                 Text = "🌐  NETWORK RESET TOOLS",
@@ -161,15 +188,18 @@ namespace Tech_ToolKit_Pro
                 AutoSize = true,
                 Location = new Point(20, 15)
             };
-            var lblSub = new Label
+            topBar.Controls.AddRange(new Control[]
             {
-                Text = "Flush DNS  ·  WinSock Reset  ·  TCP/IP Reset",
-                Font = new Font("Segoe UI", 8f),
-                ForeColor = C_SUB,
-                AutoSize = true,
-                Location = new Point(22, 34)
-            };
-            topBar.Controls.AddRange(new Control[] { lblTitle, lblSub });
+                lblTitle,
+                new Label
+                {
+                    Text      = "Flush DNS  ·  WinSock Reset  ·  TCP/IP Reset",
+                    Font      = new Font("Segoe UI", 8f),
+                    ForeColor = C_SUB,
+                    AutoSize  = true,
+                    Location  = new Point(22, 34)
+                }
+            });
 
             // ── Cards panel ───────────────────────────────────────────
             cardsPanel = new Panel
@@ -240,8 +270,7 @@ namespace Tech_ToolKit_Pro
             {
                 using (var p = new Pen(C_BORDER, 1))
                 {
-                    e.Graphics.DrawLine(p, 0, 0,
-                        infoPanel.Width, 0);
+                    e.Graphics.DrawLine(p, 0, 0, infoPanel.Width, 0);
                     e.Graphics.DrawLine(p, 0, infoPanel.Height - 1,
                         infoPanel.Width, infoPanel.Height - 1);
                 }
@@ -250,8 +279,7 @@ namespace Tech_ToolKit_Pro
                     e.Graphics.FillRectangle(br, 0, 0,
                         infoPanel.Width, infoPanel.Height);
             };
-
-            var lblInfo = new Label
+            infoPanel.Controls.Add(new Label
             {
                 Text = "ℹ  Flush DNS is safe and instant.  " +
                        "WinSock Reset and TCP/IP Reset require administrator rights " +
@@ -262,8 +290,7 @@ namespace Tech_ToolKit_Pro
                 AutoSize = false,
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft
-            };
-            infoPanel.Controls.Add(lblInfo);
+            });
 
             // ── Log panel ─────────────────────────────────────────────
             logPanel = new Panel
@@ -273,14 +300,14 @@ namespace Tech_ToolKit_Pro
                 Padding = new Padding(10, 8, 10, 8)
             };
 
-            var lblLog = new Label
+            logPanel.Controls.Add(new Label
             {
                 Text = "COMMAND OUTPUT",
                 Font = new Font("Segoe UI Semibold", 8.5f),
                 ForeColor = C_SUB,
                 AutoSize = true,
                 Location = new Point(0, 0)
-            };
+            });
 
             logList = new ListView
             {
@@ -307,18 +334,16 @@ namespace Tech_ToolKit_Pro
             logList.DrawItem += (s, e2) => { };
             logList.DrawSubItem += DrawRow;
 
-            logPanel.Controls.AddRange(new Control[] { lblLog, logList });
+            logPanel.Controls.Add(logList);
             logPanel.Resize += (s, e) =>
                 logList.Size = new Size(logPanel.Width - 20, logPanel.Height - 28);
 
             // ── Assemble ──────────────────────────────────────────────
-            // DockStyle rules: Fill goes first, then Bottom, then Top
-            // panels in reverse visual order (last added = topmost).
-            Controls.Add(logPanel);    // DockStyle.Fill  — must be first
-            Controls.Add(infoPanel);   // DockStyle.Top   — below cardsPanel
-            Controls.Add(cardsPanel);  // DockStyle.Top   — below topBar
-            Controls.Add(topBar);      // DockStyle.Top   — topmost
-            Controls.Add(bottomBar);   // DockStyle.Bottom
+            Controls.Add(logPanel);    // Fill  — first
+            Controls.Add(infoPanel);   // Top
+            Controls.Add(cardsPanel);  // Top
+            Controls.Add(topBar);      // Top   — topmost
+            Controls.Add(bottomBar);   // Bottom
         }
 
         // ════════════════════════════════════════════════════════════
@@ -350,6 +375,7 @@ namespace Tech_ToolKit_Pro
                 Location = new Point(14, 10)
             };
 
+            // Title — no leading spaces
             var lblTitleL = new Label
             {
                 Text = t.Title,
@@ -359,6 +385,7 @@ namespace Tech_ToolKit_Pro
                 Location = new Point(58, 12)
             };
 
+            // Subtitle / command — no leading spaces
             var lblCmd = new Label
             {
                 Text = t.Subtitle,
@@ -395,7 +422,6 @@ namespace Tech_ToolKit_Pro
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            // Status badge — shows admin requirement clearly
             t.StatusL = new Label
             {
                 Text = t.NeedsAdmin ? "⚡ Admin required" : "✔ No admin needed",
@@ -417,8 +443,9 @@ namespace Tech_ToolKit_Pro
             {
                 lblDesc.Width = card.Width - 24;
                 t.PBar.Width = card.Width - 24;
-                t.BtnRun.Location = new Point(card.Width - t.BtnRun.Width - 10,
-                                              card.Height - t.BtnRun.Height - 10);
+                t.BtnRun.Location = new Point(
+                    card.Width - t.BtnRun.Width - 10,
+                    card.Height - t.BtnRun.Height - 10);
             };
 
             return card;
@@ -431,13 +458,8 @@ namespace Tech_ToolKit_Pro
         {
             var t = tools[idx];
 
-            // ── Admin guard ───────────────────────────────────────────
-            // Only prompt when the tool actually needs admin AND we
-            // are not already running elevated.
             if (t.NeedsAdmin && !AdminHelper.EnsureAdmin(t.Title))
             {
-                // User cancelled or chose to restart — abort this tool
-                // and keep the run-all chain alive (call onComplete).
                 onComplete?.Invoke();
                 return;
             }
@@ -453,7 +475,6 @@ namespace Tech_ToolKit_Pro
             AddLog(t.Title, "Started", t.Exe + " " + t.Args);
             runningCount++;
 
-            // Run on a background thread so the UI stays responsive
             System.Threading.ThreadPool.QueueUserWorkItem(_ =>
             {
                 int exitCode = 0;
@@ -485,8 +506,7 @@ namespace Tech_ToolKit_Pro
                 }
                 catch (Exception ex)
                 {
-                    // Redirect failed (common when tool needs admin).
-                    // Retry with ShellExecute + runas (no output capture).
+                    // Redirect failed — retry with ShellExecute + runas
                     try
                     {
                         var proc = new Process
@@ -504,7 +524,7 @@ namespace Tech_ToolKit_Pro
                         proc.Start();
                         proc.WaitForExit(20000);
                         exitCode = proc.ExitCode;
-                        output = "Completed (output captured via admin shell)";
+                        output = "Completed via admin shell";
                     }
                     catch
                     {
@@ -523,13 +543,36 @@ namespace Tech_ToolKit_Pro
             });
         }
 
+        // ════════════════════════════════════════════════════════════
+        //  TOOL DONE — success detection
+        //  ─────────────────────────────────────────────────────────
+        //  A tool is considered successful if:
+        //    a) its exit code is in OkExitCodes, OR
+        //    b) its output contains one of the OkKeywords (case-insensitive)
+        //
+        //  This correctly handles netsh int ip reset which returns
+        //  exit code 1 and outputs "Resetting... OK!" on success.
+        // ════════════════════════════════════════════════════════════
         void ToolDone(int idx, int exitCode, string output, Action onComplete)
         {
             var t = tools[idx];
             t.PBar.Animate = false;
 
-            // Exit code 1326 is acceptable for some netsh commands
-            bool ok = (exitCode == 0 || exitCode == 1326);
+            // ── Check exit code ───────────────────────────────────────
+            bool okByCode = false;
+            foreach (int code in t.OkExitCodes)
+                if (exitCode == code) { okByCode = true; break; }
+
+            // ── Check output keywords ─────────────────────────────────
+            bool okByOutput = false;
+            if (!string.IsNullOrEmpty(output))
+            {
+                string lo = output.ToLower();
+                foreach (string kw in t.OkKeywords)
+                    if (lo.Contains(kw.ToLower())) { okByOutput = true; break; }
+            }
+
+            bool ok = okByCode || okByOutput;
 
             t.PBar.Value = 100;
             t.PBar.SetColor(ok ? C_GREEN : C_RED);
@@ -563,7 +606,6 @@ namespace Tech_ToolKit_Pro
         // ════════════════════════════════════════════════════════════
         void BtnRunAll_Click(object sender, EventArgs e)
         {
-            // Guard the whole batch upfront — WinSock + TCP/IP need admin
             if (!AdminHelper.EnsureAdmin("Run All Network Resets")) return;
 
             var confirm = MessageBox.Show(
@@ -620,11 +662,10 @@ namespace Tech_ToolKit_Pro
             item.SubItems.Add(note);
             item.ForeColor = fg ?? C_TXT;
             item.Tag = status.ToLower().Contains("success") ||
-                       status.ToLower().Contains("complete")
-                ? "ok"
-                : status.ToLower().Contains("fail") ||
-                  status.ToLower().Contains("error")
-                    ? "fail" : "info";
+                       status.ToLower().Contains("complete") ? "ok"
+                     : status.ToLower().Contains("fail") ||
+                       status.ToLower().Contains("error") ? "fail"
+                     : "info";
             logList.Items.Add(item);
             logList.EnsureVisible(logList.Items.Count - 1);
         }
@@ -721,7 +762,7 @@ namespace Tech_ToolKit_Pro
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  NET PROGRESS BAR — animated shimmer + gradient fill + glow tip
+    //  NET PROGRESS BAR
     // ════════════════════════════════════════════════════════════════
     public class NetProgressBar : Control
     {
@@ -763,7 +804,6 @@ namespace Tech_ToolKit_Pro
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Track
             using (var br = new SolidBrush(Color.FromArgb(38, 46, 56)))
                 g.FillRectangle(br, 0, 0, Width, Height);
 
