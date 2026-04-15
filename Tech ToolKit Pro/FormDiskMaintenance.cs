@@ -134,19 +134,19 @@ namespace Tech_ToolKit_Pro
             tools.AddRange(new[]
             {
                 new DiskTool {
-                    Title      = "    Disable Hibernation",
-                    Subtitle   = "powercfg /h off",
+                    Title      = "   Disable Hibernation",
+                    Subtitle   = "  powercfg /h off",
                     Icon       = "💤",
                     Desc       = "Turns off hibernation and deletes hiberfil.sys to reclaim space.",
                     Accent     = C_BLUE,
-                    LaunchExe  = "cmd.exe",
-                    LaunchArgs = "/C powercfg /h off",
+                    LaunchExe  = "pwsh.exe",
+                    LaunchArgs = "-NoProfile -NoExit -Command \"powercfg /h off\"",
                     NeedsAdmin = true,
-                    ShowWindow = false
+                    ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    Check Disk (CHKDSK)",
-                    Subtitle   = "chkdsk C: /f /r /x",
+                    Title      = "   Check Disk (CHKDSK)",
+                    Subtitle   = "  chkdsk C: /f /r /x",
                     Icon       = "🔍",
                     Desc       = "Scans drive C: for file-system issues and bad sectors.",
                     Accent     = C_AMBER,
@@ -156,8 +156,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    SFC System Scan",
-                    Subtitle   = "sfc /scannow",
+                    Title      = "   SFC System Scan",
+                    Subtitle   = "  sfc /scannow",
                     Icon       = "🛡",
                     Desc       = "Validates protected Windows files and restores corrupted copies.",
                     Accent     = C_GREEN,
@@ -167,8 +167,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    DISM Health Restore",
-                    Subtitle   = "DISM /Cleanup-Image /RestoreHealth",
+                    Title      = "   DISM Health Restore",
+                    Subtitle   = "  DISM /Cleanup-Image /RestoreHealth",
                     Icon       = "🔧",
                     Desc       = "Repairs the Windows component store. Run before or after SFC.",
                     Accent     = C_PURPLE,
@@ -178,8 +178,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    Optimize Drive",
-                    Subtitle   = "defrag C: /U /V",
+                    Title      = "   Optimize Drive",
+                    Subtitle   = "  defrag C: /U /V",
                     Icon       = "⚡",
                     Desc       = "Runs defrag or TRIM on drive C: to improve performance.",
                     Accent     = C_TEAL,
@@ -189,8 +189,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    Clear Update Cache",
-                    Subtitle   = "Stop → Delete → Restart wuauserv",
+                    Title      = "   Clear Update Cache",
+                    Subtitle   = "  Stop → Delete → Restart wuauserv",
                     Icon       = "🔄",
                     Desc       = "Stops update services, clears the download cache, then restarts them.",
                     Accent     = C_ORANGE,
@@ -198,8 +198,8 @@ namespace Tech_ToolKit_Pro
                     SpecialKey = "wucache"
                 },
                 new DiskTool {
-                    Title      = "    Clear Event Logs",
-                    Subtitle   = "wevtutil cl System / Application",
+                    Title      = "   Clear Event Logs",
+                    Subtitle   = "  wevtutil cl System / Application",
                     Icon       = "📋",
                     Desc       = "Clears Windows System, Application and Security event logs.",
                     Accent     = C_RED,
@@ -209,8 +209,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = false
                 },
                 new DiskTool {
-                    Title      = "    Compact OS",
-                    Subtitle   = "compact /CompactOS:always",
+                    Title      = "   Compact OS",
+                    Subtitle   = "  compact /CompactOS:always",
                     Icon       = "🗜",
                     Desc       = "Compresses Windows OS files to save 1–3 GB on low-storage devices.",
                     Accent     = C_TEAL,
@@ -220,8 +220,8 @@ namespace Tech_ToolKit_Pro
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "    Control Panel",
-                    Subtitle   = "control.exe",
+                    Title      = "   Control Panel",
+                    Subtitle   = "  control.exe",
                     Icon       = "🖥",
                     Desc       = "Opens the Windows Control Panel for system settings and hardware.",
                     Accent     = C_BLUE,
