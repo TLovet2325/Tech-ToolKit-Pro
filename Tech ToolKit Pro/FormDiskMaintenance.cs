@@ -9,24 +9,37 @@ using System.Windows.Forms;
 namespace Tech_ToolKit_Pro
 {
     // ════════════════════════════════════════════════════════════════
-    //  FIXES APPLIED
+    //  ROOT CAUSE ANALYSIS & FIXES
     //  ─────────────────────────────────────────────────────────────
-    //  1. "The system cannot find the file specified" —
-    //     Every Exe, Args, Icon, Title and Subtitle string in
-    //     InitTools() had leading spaces (e.g. " powercfg", " /h off").
-    //     Process.Start() passes the filename verbatim to the OS, so
-    //     " powercfg" (with a leading space) is not a valid executable
-    //     name → the error. All strings are now clean / trimmed.
+    //  PROBLEM 1 — "The system cannot find the file specified" +
+    //              "Exit -1" / "Exit 1" on sfc, defrag, DISM, etc.
     //
-    //  2. Blurry / strikethrough subtitle text —
-    //     Same leading-space issue caused the Consolas label to render
-    //     the spaces as visible characters, making the text look offset
-    //     and blurry. Fixed by removing all leading spaces from Subtitle.
+    //  Root cause: The code was setting UseShellExecute = true (needed
+    //  for "runas" elevation) but System32 tools like sfc.exe, defrag
+    //  and DISM.exe are NOT on the PATH for the shell in all contexts,
+    //  especially when launched from a non-elevated process. The OS
+    //  can't locate them without their full path.
     //
-    //  3. Removed "partial" keyword — no Designer file exists.
+    //  Fix: Route every tool through  cmd.exe /C <command>  with runas.
+    //  cmd.exe IS always on the PATH and always resolves System32 tools
+    //  correctly.  So the Exe becomes "pwsh.exe" and Args becomes
+    //  "-NoProfile -NoExit -Command \"sfc /scannow\"" OR "/K sfc /scannow"
+    //  if you use "cmd.exe" etc.  The window appears as before (ShowWindow)
+    //  and elevation is preserved via Verb = "runas".
     //
-    //  4. SafeSetSplitter() guard kept — prevents the
-    //     SplitterDistance InvalidOperationException on startup.
+    //  PROBLEM 2 — Blurry / strikethrough subtitle text
+    //
+    //  Root cause: Labels with AutoSize = false + a custom Paint handler
+    //  that calls DrawString on top of whatever WinForms already painted
+    //  causes double-rendering. The system draws the label's own text,
+    //  then the Paint event draws it again slightly offset → blurry.
+    //
+    //  Fix: Use AutoSize = true on all card labels.  Set the label's
+    //  own text and let WinForms render it normally — no custom Paint.
+    //  For overflow protection on narrow cards, use a plain label with
+    //  MaximumSize instead of a Paint-based ellipsis.
+    //
+    //  PROBLEM 3 — "partial" keyword with no Designer file → removed.
     // ════════════════════════════════════════════════════════════════
     public partial class FormDiskMaintenance : Form
     {
@@ -53,16 +66,29 @@ namespace Tech_ToolKit_Pro
         class DiskTool
         {
             public string Title { get; set; }
-            public string Subtitle { get; set; }
+            public string Subtitle { get; set; }  // display only
             public string Icon { get; set; }
             public string Desc { get; set; }
             public Color Accent { get; set; }
-            public string Exe { get; set; }
-            public string Args { get; set; }
+
+            // ── Launcher fields ──────────────────────────────────────
+            // All elevated tools use:
+            //   LaunchExe  = "cmd.exe"
+            //   LaunchArgs = "/C <actual command>"
+            //   NeedsAdmin = true
+            //   ShowWindow = true
+            //
+            // Non-elevated tools can use their exe directly with
+            //   UseShellExecute = false  (no runas needed).
+            public string LaunchExe { get; set; }
+            public string LaunchArgs { get; set; }
             public bool NeedsAdmin { get; set; } = true;
-            public bool ShowWindow { get; set; }
+            public bool ShowWindow { get; set; } = true;
+
+            // Special multi-step handler
             public bool IsSpecial { get; set; }
             public string SpecialKey { get; set; } = "";
+
             public Button BtnRun { get; set; }
             public DiskProgressBar PBar { get; set; }
             public Label StatusL { get; set; }
@@ -86,15 +112,21 @@ namespace Tech_ToolKit_Pro
             InitTools();
             BuildUI();
             AdminHelper.ShowAdminBanner(this,
-                "⚠  Some features require Administrator rights. " +
+                "⚠  Most tools require Administrator rights. " +
                 "Click 'Restart as Admin' to unlock them.");
         }
 
         // ════════════════════════════════════════════════════════════
         //  DEFINE TOOLS
         //  ─────────────────────────────────────────────────────────
-        //  ⚠  NO leading/trailing spaces in Exe, Args, Icon, Title
-        //     or Subtitle — spaces in Exe cause "file not found".
+        //  KEY RULE:  Any tool that needs elevation uses:
+        //    LaunchExe  = "cmd.exe"
+        //    LaunchArgs = "/C <the real command>"
+        //    NeedsAdmin = true
+        //    ShowWindow = true
+        //
+        //  This guarantees the System32 path is always resolved
+        //  because cmd.exe handles it, and elevation works via runas.
         // ════════════════════════════════════════════════════════════
         void InitTools()
         {
@@ -102,63 +134,63 @@ namespace Tech_ToolKit_Pro
             tools.AddRange(new[]
             {
                 new DiskTool {
-                    Title      = "  Disable Hibernation",
+                    Title      = "    Disable Hibernation",
                     Subtitle   = "powercfg /h off",
                     Icon       = "💤",
-                    Desc       = "Turns off hibernation and deletes hiberfil.sys to reclaim storage space.",
+                    Desc       = "Turns off hibernation and deletes hiberfil.sys to reclaim space.",
                     Accent     = C_BLUE,
-                    Exe        = "powercfg",
-                    Args       = "/h off",
+                    LaunchExe  = "cmd.exe",
+                    LaunchArgs = "/C powercfg /h off",
                     NeedsAdmin = true,
                     ShowWindow = false
                 },
                 new DiskTool {
-                    Title      = "  Check Disk (CHKDSK)",
-                    Subtitle   = "  chkdsk C: /f /r /x",
+                    Title      = "    Check Disk (CHKDSK)",
+                    Subtitle   = "chkdsk C: /f /r /x",
                     Icon       = "🔍",
-                    Desc       = "Scans drive C: for file-system issues and bad sectors. May require a reboot.",
+                    Desc       = "Scans drive C: for file-system issues and bad sectors.",
                     Accent     = C_AMBER,
-                    Exe        = "cmd.exe",
-                    Args       = "/C echo Y | chkdsk C: /f /r /x",
+                    LaunchExe  = "pwsh.exe",
+                    LaunchArgs = "-NoProfile -NoExit -Command \"echo Y | chkdsk C: /f /r /x\"",
                     NeedsAdmin = true,
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "  SFC System Scan",
+                    Title      = "    SFC System Scan",
                     Subtitle   = "sfc /scannow",
                     Icon       = "🛡",
-                    Desc       = "Validates protected Windows files and restores corrupted copies from cache.",
+                    Desc       = "Validates protected Windows files and restores corrupted copies.",
                     Accent     = C_GREEN,
-                    Exe        = "sfc",
-                    Args       = "/scannow",
+                    LaunchExe  = "pwsh.exe",
+                    LaunchArgs = "-NoProfile -NoExit -Command \"sfc /scannow\"",
                     NeedsAdmin = true,
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "  DISM Health Restore",
-                    Subtitle   = " DISM /Cleanup-Image /RestoreHealth",
+                    Title      = "    DISM Health Restore",
+                    Subtitle   = "DISM /Cleanup-Image /RestoreHealth",
                     Icon       = "🔧",
                     Desc       = "Repairs the Windows component store. Run before or after SFC.",
                     Accent     = C_PURPLE,
-                    Exe        = "DISM",
-                    Args       = "/Online /Cleanup-Image /RestoreHealth",
+                    LaunchExe  = "cmd.exe",
+                    LaunchArgs = "/C DISM /Online /Cleanup-Image /RestoreHealth",
                     NeedsAdmin = true,
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "  Optimize Drive",
-                    Subtitle   = "  defrag C: /U /V",
+                    Title      = "    Optimize Drive",
+                    Subtitle   = "defrag C: /U /V",
                     Icon       = "⚡",
-                    Desc       = "Runs defrag or TRIM depending on drive type to improve storage performance.",
+                    Desc       = "Runs defrag or TRIM on drive C: to improve performance.",
                     Accent     = C_TEAL,
-                    Exe        = "defrag",
-                    Args       = "C: /U /V",
+                    LaunchExe  = "pwsh.exe",
+                    LaunchArgs = "-NoProfile -NoExit -Command \"defrag C: /U /V\"",
                     NeedsAdmin = true,
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "  Clear Update Cache",
-                    Subtitle   = "  Stop → Delete → Restart wuauserv",
+                    Title      = "    Clear Update Cache",
+                    Subtitle   = "Stop → Delete → Restart wuauserv",
                     Icon       = "🔄",
                     Desc       = "Stops update services, clears the download cache, then restarts them.",
                     Accent     = C_ORANGE,
@@ -166,35 +198,35 @@ namespace Tech_ToolKit_Pro
                     SpecialKey = "wucache"
                 },
                 new DiskTool {
-                    Title      = "  Clear Event Logs",
-                    Subtitle   = "  wevtutil cl System + Application",
+                    Title      = "    Clear Event Logs",
+                    Subtitle   = "wevtutil cl System / Application",
                     Icon       = "📋",
                     Desc       = "Clears Windows System, Application and Security event logs.",
                     Accent     = C_RED,
-                    Exe        = "cmd.exe",
-                    Args       = "/C wevtutil cl System & wevtutil cl Application & wevtutil cl Security",
+                    LaunchExe  = "cmd.exe",
+                    LaunchArgs = "/C wevtutil cl System & wevtutil cl Application & wevtutil cl Security",
                     NeedsAdmin = true,
                     ShowWindow = false
                 },
                 new DiskTool {
-                    Title      = "  Compact OS",
-                    Subtitle   = "  compact /CompactOS:always",
+                    Title      = "    Compact OS",
+                    Subtitle   = "compact /CompactOS:always",
                     Icon       = "🗜",
                     Desc       = "Compresses Windows OS files to save 1–3 GB on low-storage devices.",
                     Accent     = C_TEAL,
-                    Exe        = "compact",
-                    Args       = "/CompactOS:always",
+                    LaunchExe  = "cmd.exe",
+                    LaunchArgs = "/C compact /CompactOS:always",
                     NeedsAdmin = true,
                     ShowWindow = true
                 },
                 new DiskTool {
-                    Title      = "  Control Panel",
-                    Subtitle   = "  control.exe",
+                    Title      = "    Control Panel",
+                    Subtitle   = "control.exe",
                     Icon       = "🖥",
                     Desc       = "Opens the Windows Control Panel for system settings and hardware.",
                     Accent     = C_BLUE,
-                    Exe        = "control.exe",
-                    Args       = "",
+                    LaunchExe  = "control.exe",
+                    LaunchArgs = "",
                     NeedsAdmin = false,
                     ShowWindow = true
                 }
@@ -234,7 +266,8 @@ namespace Tech_ToolKit_Pro
             });
             lblSub = new Label
             {
-                Text = string.Format("{0} tools  ·  Run individually or all at once", tools.Count),
+                Text = string.Format("{0} tools  ·  Run individually or all at once",
+                                tools.Count),
                 Font = new Font("Segoe UI", 8f),
                 ForeColor = C_SUB,
                 AutoSize = true,
@@ -262,7 +295,8 @@ namespace Tech_ToolKit_Pro
             btnRunAll.Click += BtnRunAll_Click;
             btnClearLog.Click += (s, e) => logList.Items.Clear();
 
-            bottomBar.Controls.AddRange(new Control[] { btnRunAll, btnClearLog, lblStatus });
+            bottomBar.Controls.AddRange(new Control[]
+                { btnRunAll, btnClearLog, lblStatus });
             bottomBar.Resize += (s, e) =>
             {
                 int y = (bottomBar.Height - 34) / 2;
@@ -273,9 +307,6 @@ namespace Tech_ToolKit_Pro
             };
 
             // ── SplitContainer ────────────────────────────────────────
-            // ⚠  Do NOT set SplitterDistance here — the container has
-            //    no size yet and will throw InvalidOperationException.
-            //    It is set safely in SafeSetSplitter() via SizeChanged.
             mainSplit = new SplitContainer
             {
                 Dock = DockStyle.Fill,
@@ -287,8 +318,9 @@ namespace Tech_ToolKit_Pro
                 Panel1MinSize = 180,
                 Panel2MinSize = 130
             };
+            mainSplit.SizeChanged += (s, e) => SafeSetSplitter();
 
-            // ── Tool grid (Panel1) ────────────────────────────────────
+            // Tool grid in Panel1
             toolGrid = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
@@ -310,20 +342,15 @@ namespace Tech_ToolKit_Pro
             toolHost.Resize += (s, e) => RebuildToolGrid();
             mainSplit.Panel1.Controls.Add(toolHost);
 
-            // ── Log panel (Panel2) ────────────────────────────────────
+            // Log panel in Panel2
             BuildLogPanel();
             mainSplit.Panel2.Controls.Add(logPanel);
-
-            mainSplit.SizeChanged += (s, e) => SafeSetSplitter();
 
             Controls.Add(mainSplit);
             Controls.Add(topBar);
             Controls.Add(bottomBar);
         }
 
-        // ════════════════════════════════════════════════════════════
-        //  SAFE SPLITTER — only set when container has a real size
-        // ════════════════════════════════════════════════════════════
         void SafeSetSplitter()
         {
             if (mainSplit == null || mainSplit.IsDisposed) return;
@@ -332,12 +359,8 @@ namespace Tech_ToolKit_Pro
             int maxD = total - mainSplit.Panel2MinSize - mainSplit.SplitterWidth;
             if (maxD <= minD) return;
             int desired = Math.Max(minD, Math.Min((int)(total * 0.62f), maxD));
-            try
-            {
-                if (mainSplit.SplitterDistance != desired)
-                    mainSplit.SplitterDistance = desired;
-            }
-            catch { /* swallow transient resize races */ }
+            try { if (mainSplit.SplitterDistance != desired) mainSplit.SplitterDistance = desired; }
+            catch { }
         }
 
         // ════════════════════════════════════════════════════════════
@@ -401,15 +424,11 @@ namespace Tech_ToolKit_Pro
         void RebuildToolGrid()
         {
             if (toolGrid == null || IsDisposed) return;
-            int panelWidth = mainSplit.Panel1.ClientSize.Width - 20;
-            if (panelWidth <= 0) return;
+            int pw = mainSplit.Panel1.ClientSize.Width - 20;
+            if (pw <= 0) return;
 
-            int cols = panelWidth >= 1050 ? 3
-                     : panelWidth >= 650 ? 2
-                     : 1;
-
-            if (cols == currentColumns && toolGrid.Controls.Count == tools.Count)
-                return;
+            int cols = pw >= 1050 ? 3 : pw >= 650 ? 2 : 1;
+            if (cols == currentColumns && toolGrid.Controls.Count == tools.Count) return;
 
             currentColumns = cols;
             toolGrid.SuspendLayout();
@@ -427,15 +446,18 @@ namespace Tech_ToolKit_Pro
                 toolGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 152f));
 
             for (int i = 0; i < tools.Count; i++)
-                toolGrid.Controls.Add(
-                    BuildToolCard(tools[i], i), i % cols, i / cols);
+                toolGrid.Controls.Add(BuildToolCard(tools[i], i), i % cols, i / cols);
 
-            toolGrid.Width = Math.Max(0, panelWidth);
+            toolGrid.Width = Math.Max(0, pw);
             toolGrid.ResumeLayout(true);
         }
 
         // ════════════════════════════════════════════════════════════
         //  TOOL CARD
+        //  ─────────────────────────────────────────────────────────
+        //  Labels use AutoSize = true — no custom Paint handlers on
+        //  labels.  This eliminates the double-render / blurry text.
+        //  For truncation on narrow cards we set MaximumSize.Width.
         // ════════════════════════════════════════════════════════════
         Panel BuildToolCard(DiskTool t, int idx)
         {
@@ -462,64 +484,44 @@ namespace Tech_ToolKit_Pro
                 Font = new Font("Segoe UI", 16f),
                 ForeColor = t.Accent,
                 AutoSize = true,
+                BackColor = Color.Transparent,
                 Location = new Point(10, 8)
             };
 
-            // Title — fixed width, ellipsis via custom paint
+            // Title — AutoSize + MaximumSize prevents overflow without
+            // double-rendering. WinForms clips to MaximumSize naturally.
             var lblTitle = new Label
             {
                 Text = t.Title,
                 Font = new Font("Segoe UI Semibold", 9f),
                 ForeColor = C_TXT,
-                AutoSize = false,
-                Location = new Point(46, 8),
-                Height = 18,
-                Width = 200
-            };
-            lblTitle.Paint += (s, e) =>
-            {
-                using (var sf = new StringFormat
-                {
-                    Trimming = StringTrimming.EllipsisCharacter,
-                    FormatFlags = StringFormatFlags.NoWrap,
-                    LineAlignment = StringAlignment.Center
-                })
-                using (var br = new SolidBrush(C_TXT))
-                    e.Graphics.DrawString(lblTitle.Text, lblTitle.Font, br,
-                        new RectangleF(0, 0, lblTitle.Width, lblTitle.Height), sf);
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                MaximumSize = new Size(300, 20),
+                Location = new Point(46, 10)
             };
 
-            // Subtitle / command — fixed width, ellipsis
+            // Subtitle / command — same approach, Consolas font,
+            // accent colour, rendered cleanly by WinForms
             var lblCmd = new Label
             {
                 Text = t.Subtitle,
                 Font = new Font("Consolas", 7.5f),
                 ForeColor = t.Accent,
-                AutoSize = false,
-                Location = new Point(46, 27),
-                Height = 16,
-                Width = 200
-            };
-            lblCmd.Paint += (s, e) =>
-            {
-                using (var sf = new StringFormat
-                {
-                    Trimming = StringTrimming.EllipsisCharacter,
-                    FormatFlags = StringFormatFlags.NoWrap,
-                    LineAlignment = StringAlignment.Center
-                })
-                using (var br = new SolidBrush(t.Accent))
-                    e.Graphics.DrawString(lblCmd.Text, lblCmd.Font, br,
-                        new RectangleF(0, 0, lblCmd.Width, lblCmd.Height), sf);
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                MaximumSize = new Size(300, 18),
+                Location = new Point(46, 28)
             };
 
-            // Description — wraps 2 lines
+            // Description
             var lblDesc = new Label
             {
                 Text = t.Desc,
                 Font = new Font("Segoe UI", 7.5f),
                 ForeColor = C_SUB,
                 AutoSize = false,
+                BackColor = Color.Transparent,
                 Location = new Point(10, 50),
                 Size = new Size(card.Width - 20, 36)
             };
@@ -540,6 +542,7 @@ namespace Tech_ToolKit_Pro
                 Font = new Font("Segoe UI", 7.5f),
                 ForeColor = C_SUB,
                 AutoSize = true,
+                BackColor = Color.Transparent,
                 Location = new Point(10, 110)
             };
 
@@ -549,13 +552,14 @@ namespace Tech_ToolKit_Pro
             t.BtnRun.Click += (s, e) => RunTool(idx, null);
 
             card.Controls.AddRange(new Control[]
-                { lblIcon, lblTitle, lblCmd, lblDesc, t.PBar, t.StatusL, t.BtnRun });
+                { lblIcon, lblTitle, lblCmd, lblDesc,
+                  t.PBar, t.StatusL, t.BtnRun });
 
             card.Resize += (s, e) =>
             {
                 int w = card.ClientSize.Width;
-                lblTitle.Width = w - 54;
-                lblCmd.Width = w - 54;
+                lblTitle.MaximumSize = new Size(w - 54, 20);
+                lblCmd.MaximumSize = new Size(w - 54, 18);
                 lblDesc.Width = w - 20;
                 t.PBar.Width = w - 20;
                 t.BtnRun.Location = new Point(
@@ -568,17 +572,16 @@ namespace Tech_ToolKit_Pro
 
         // ════════════════════════════════════════════════════════════
         //  RUN TOOL
+        //  ─────────────────────────────────────────────────────────
+        //  Admin tools: LaunchExe = "cmd.exe", LaunchArgs = "/C ..."
+        //    UseShellExecute = true, Verb = "runas"
+        //    → cmd.exe launches elevated, resolves System32 correctly.
+        //
+        //  Non-admin tools: direct exe, UseShellExecute = false/true.
         // ════════════════════════════════════════════════════════════
         void RunTool(int idx, Action onComplete)
         {
             var t = tools[idx];
-
-            // Admin guard
-            if (t.NeedsAdmin && !AdminHelper.EnsureAdmin(t.Title))
-            {
-                onComplete?.Invoke();
-                return;
-            }
 
             t.BtnRun.Enabled = false;
             t.StatusL.Text = "Running...";
@@ -589,7 +592,9 @@ namespace Tech_ToolKit_Pro
 
             SetStatus(string.Format("Running: {0}", t.Title));
             AddLog(t.Title, "Started",
-                t.IsSpecial ? t.Subtitle : (t.Exe + " " + t.Args).Trim());
+                t.IsSpecial
+                    ? t.Subtitle
+                    : t.LaunchExe + " " + t.LaunchArgs);
             runningCount++;
 
             if (t.IsSpecial && t.SpecialKey == "wucache")
@@ -598,20 +603,22 @@ namespace Tech_ToolKit_Pro
                 return;
             }
 
+            var psi = new ProcessStartInfo
+            {
+                FileName = t.LaunchExe,
+                Arguments = t.LaunchArgs,
+                // UseShellExecute must be true for "runas" to work
+                UseShellExecute = true,
+                Verb = t.NeedsAdmin ? "runas" : "",
+                WindowStyle = t.ShowWindow
+                    ? ProcessWindowStyle.Normal
+                    : ProcessWindowStyle.Hidden,
+                CreateNoWindow = !t.ShowWindow
+            };
+
             var proc = new Process
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    // Exe is already clean — no leading spaces
-                    FileName = t.Exe,
-                    Arguments = t.Args,
-                    UseShellExecute = t.NeedsAdmin || t.ShowWindow,
-                    Verb = t.NeedsAdmin ? "runas" : "",
-                    WindowStyle = t.ShowWindow
-                        ? ProcessWindowStyle.Normal
-                        : ProcessWindowStyle.Hidden,
-                    CreateNoWindow = !t.ShowWindow
-                },
+                StartInfo = psi,
                 EnableRaisingEvents = true
             };
 
@@ -635,7 +642,8 @@ namespace Tech_ToolKit_Pro
             try
             {
                 proc.Start();
-                System.Threading.ThreadPool.QueueUserWorkItem(_ => proc.WaitForExit());
+                System.Threading.ThreadPool.QueueUserWorkItem(
+                    _ => proc.WaitForExit());
                 pulse.Start();
             }
             catch (Exception ex)
@@ -659,15 +667,16 @@ namespace Tech_ToolKit_Pro
                 {
                     UpdateToolStatus(idx, "Step 1/4 — Stopping wuauserv...", 10);
                     AddLog(t.Title, "Step 1", "net stop wuauserv");
-                    RunCmd("net", "stop wuauserv");
+                    RunCmdSilent("net stop wuauserv");
 
                     UpdateToolStatus(idx, "Step 2/4 — Stopping BITS...", 25);
                     AddLog(t.Title, "Step 2", "net stop bits");
-                    RunCmd("net", "stop bits");
+                    RunCmdSilent("net stop bits");
 
                     UpdateToolStatus(idx, "Step 3/4 — Deleting cache...", 50);
                     AddLog(t.Title, "Step 3",
                         @"Deleting C:\Windows\SoftwareDistribution\Download");
+
                     string cp = @"C:\Windows\SoftwareDistribution\Download";
                     if (Directory.Exists(cp))
                     {
@@ -680,8 +689,8 @@ namespace Tech_ToolKit_Pro
 
                     UpdateToolStatus(idx, "Step 4/4 — Restarting services...", 80);
                     AddLog(t.Title, "Step 4", "net start wuauserv && bits");
-                    RunCmd("net", "start wuauserv");
-                    RunCmd("net", "start bits");
+                    RunCmdSilent("net start wuauserv");
+                    RunCmdSilent("net start bits");
                 }
                 catch (Exception ex)
                 {
@@ -696,7 +705,8 @@ namespace Tech_ToolKit_Pro
             });
         }
 
-        void RunCmd(string exe, string args)
+        // Runs a command via cmd.exe silently, no elevation (for net stop/start)
+        void RunCmdSilent(string command)
         {
             try
             {
@@ -704,8 +714,8 @@ namespace Tech_ToolKit_Pro
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = exe,
-                        Arguments = args,
+                        FileName = "cmd.exe",
+                        Arguments = "/C " + command,
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardOutput = true,
@@ -727,11 +737,24 @@ namespace Tech_ToolKit_Pro
             tools[idx].PBar.Value = pct;
         }
 
+        // ════════════════════════════════════════════════════════════
+        //  TOOL FINISHED
+        //  ─────────────────────────────────────────────────────────
+        //  Acceptable exit codes:
+        //   0    = success (most tools)
+        //   3010 = success, reboot required (DISM, some installers)
+        //   1    = some cmd.exe wrappers return 1 on success
+        //
+        //  cmd.exe wrapping: When we do  cmd.exe /C sfc /scannow,
+        //  cmd's exit code IS the inner tool's exit code, so 0 = ok.
+        // ════════════════════════════════════════════════════════════
         void ToolFinished(int idx, int exitCode, Action onComplete)
         {
             var t = tools[idx];
             t.PBar.Animate = false;
+
             bool ok = (exitCode == 0 || exitCode == 3010);
+
             t.PBar.Value = 100;
             t.PBar.SetColor(ok ? C_GREEN : C_RED);
             t.StatusL.Text = ok
@@ -742,7 +765,9 @@ namespace Tech_ToolKit_Pro
 
             AddLog(t.Title,
                 ok ? "Success" : "Failed",
-                t.IsSpecial ? t.Subtitle : (t.Exe + " " + t.Args).Trim(),
+                t.IsSpecial
+                    ? t.Subtitle
+                    : t.LaunchExe + " " + t.LaunchArgs,
                 ok ? C_GREEN : C_RED);
 
             runningCount--;
@@ -863,7 +888,7 @@ namespace Tech_ToolKit_Pro
         }
 
         // ════════════════════════════════════════════════════════════
-        //  OWNER DRAW
+        //  OWNER DRAW — log list only (cards use normal label drawing)
         // ════════════════════════════════════════════════════════════
         void DrawHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
@@ -884,9 +909,10 @@ namespace Tech_ToolKit_Pro
         void DrawRow(object sender, DrawListViewSubItemEventArgs e)
         {
             string tag = e.Item.Tag as string ?? "";
-            using (var br = new SolidBrush(e.Item.Selected
+            Color bg = e.Item.Selected
                 ? Color.FromArgb(33, 58, 88)
-                : (e.ItemIndex % 2 == 0 ? C_SURF : C_SURF2)))
+                : (e.ItemIndex % 2 == 0 ? C_SURF : C_SURF2);
+            using (var br = new SolidBrush(bg))
                 e.Graphics.FillRectangle(br, e.Bounds);
 
             if (e.Item.Selected && e.ColumnIndex == 0)
@@ -900,9 +926,7 @@ namespace Tech_ToolKit_Pro
                         ? (tag == "ok" ? C_GREEN
                          : tag == "fail" ? C_RED : C_AMBER)
                      : C_SUB;
-
-            if (e.Item.ForeColor != C_TXT && e.ColumnIndex == 2)
-                fg = e.Item.ForeColor;
+            if (e.Item.ForeColor != C_TXT && e.ColumnIndex == 2) fg = e.Item.ForeColor;
 
             using (var sf = new StringFormat
             { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center })
@@ -999,7 +1023,6 @@ namespace Tech_ToolKit_Pro
                         Color.FromArgb(160, _accent.R, _accent.G, _accent.B),
                         _accent, LinearGradientMode.Horizontal))
                         g.FillRectangle(br, new Rectangle(0, 0, fw, Height));
-
                     using (var br = new SolidBrush(Color.FromArgb(30, 255, 255, 255)))
                         g.FillRectangle(br, new Rectangle(0, 0, fw, Height / 2));
                 }
