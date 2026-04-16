@@ -14,22 +14,7 @@
 
 Tech ToolKit Pro is a dark-themed, all-in-one Windows system maintenance suite. It provides 20+ tools covering disk health, system scans, network resets, security checks, file recovery, backup, and more — all in a single polished desktop application.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Tech ToolKit Pro                              🔵 🟣 ❌ │
-├──────────┬──────────────────────────────────────────────┤
-│          │                                              │
-│ Sidebar  │           Content Area                       │
-│          │                                              │
-│ 📊 Dashboard        Forms load here dynamically         │
-│ 🔧 Disk Maintenance                                     │
-│ 🔍 MRT Scan         Dark theme throughout               │
-│ 💾 SMART Health     Animated progress bars              │
-│ 🌐 Network Reset    Owner-drawn ListView controls       │
-│ 🛡 System Restore   Background workers (no UI freeze)   │
-│ ...                                                      │
-└──────────┴──────────────────────────────────────────────┘
-```
+![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/bbba3b95f0cc4483828596ce905a86e211b05717/Screenshot%202026-04-16%20052108.png)
 
 ---
 
