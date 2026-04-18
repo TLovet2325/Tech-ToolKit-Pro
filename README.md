@@ -1,7 +1,11 @@
-# 🛠️ Tech ToolKit Pro
+# 🚀 Tech ToolKit Pro
+Windows Repair Tool | PC Optimization Software | System Maintenance Utility
+
 ![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/db01bf9045ef3395d4b49ead5bf1fdef630eee06/Tech%20ToolKit%20(3).png)
-A Unified App for Automating and Simplifying Windows Maintenance and Repair
-> A professional Windows maintenance and diagnostic desktop application built with C# WinForms (.NET Framework 4.x)
+
+> **All-in-one Windows repair, maintenance, and optimization toolkit**
+
+Tech ToolKit Pro is a powerful desktop application built with **C# and WPF** that helps users **diagnose issues, repair system errors, and optimize PC performance**—all from a single, clean interface.
 
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?logo=windows)
 ![Language](https://img.shields.io/badge/language-C%23-239120?logo=csharp)
@@ -10,93 +14,126 @@ A Unified App for Automating and Simplifying Windows Maintenance and Repair
 
 ---
 
-## 📖 Overview
+## ⚡ Why Tech ToolKit Pro?
 
-Tech ToolKit Pro is a dark-themed, all-in-one Windows system maintenance suite. It provides 20+ tools covering disk health, system scans, network resets, security checks, file recovery, and backup — all in a single polished desktop application.
+Most Windows tools are scattered, outdated, or overly complex.  
+Tech ToolKit Pro brings everything together into one **efficient, modern toolkit** designed for both everyday users and power users.
 
 ---
+
+## 🧩 Features
+
+- 🔍 **System Diagnostics**  
+  Analyze system health and detect issues quickly  
+
+- 🛠️ **Windows Repair Tools**  
+  Fix common Windows errors and system problems  
+
+- 🚀 **Performance Optimization**  
+  Clean up junk files and improve system speed  
+
+- 💾 **Backup & Restore**  
+  Manage restore points and system recovery  
+
+- ⚙️ **Automation Tools**  
+  Execute powerful scripts using integrated PowerShell  
+
+- 🧰 **All-in-One Interface**  
+  No more switching between multiple tools  
+
+---
+
+## 📥 Download
+
+Get the latest version of **Tech ToolKit Pro**:
+
+[![Download Tech ToolKit Pro](https://img.shields.io/badge/Download-Tech%20ToolKit%20Pro-blue?style=for-the-badge&logo=windows)](https://github.com/TLovet2325/Tech-ToolKit-Pro/releases/tag/v1.0.0)
+
+> ⚠️ **Important:** Run as Administrator for full functionality
+
+---
+
+## 🖼️ Screenshots
+
 ![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/13c0ece9d38ac61d7d5f87e180ddc254d2541a2c/Screenshot%202026-04-16%20052108.png)
 
-## ✨ Features
+---
 
-- 📊 **Dashboard** — Live CPU, RAM and disk usage with real-time process table
-- 🔧 **Disk Maintenance** — 9 tools including CHKDSK, SFC, DISM, Defrag and more
-- 💾 **Disk SMART** — WMI-powered drive health, partitions and volume info
-- 🧹 **Temp Cleanup** — Clear temp files, Windows cache and SoftwareDistribution
-- 🌐 **Network Reset** — Flush DNS, WinSock reset and TCP/IP stack reset
-- 🛡 **MRT Scan** — Microsoft Malicious Software Removal Tool with auto-detection
-- 🔒 **Defender Scan** — Quick, Full, Custom and Boot-time scans via MpCmdRun
-- 🔄 **File Recovery** — Recover from Recycle Bin, Shadow Copies and Windows Backup
-- 🗄 **Windows Backup** — Backup files and folders to ZIP or WinRAR archive
-- 🛡 **System Restore** — Create, restore and delete restore points
-- 📦 **App Updates** — winget-powered update detection and installation
-- 🔄 **Windows Update** — Search, download and install updates via WUApiLib COM
-- 📋 **Task List** — Live process manager with RAM hog detection
-- 🗑 **Uninstall Apps** — Registry-based app scanner with direct uninstall
-- 📊 **System Report** — Hardware info, memory test and performance benchmark
+## ⚙️ Installation
+
+1. Download the latest release  
+2. Extract the archive  
+3. Run the application as **Administrator**  
+
+No installation required (portable ready)
 
 ---
 
-## ⚙️ Requirements
+## 🧠 Built With
 
-| Requirement | Detail |
-|---|---|
-| OS | Windows 10 / 11 (64-bit) |
-| Framework | .NET Framework 4.7.2+ |
-| IDE | Visual Studio 2019 / 2022 |
-| NuGet | `System.Management` |
-| COM Reference | `WUApiLib` (Windows Update form) |
-| Optional | WinRAR (for RAR backup format) |
-| Optional | `winget` / App Installer (for App Updates) |
+- C#  
+- WPF (Windows Presentation Foundation)  
+- PowerShell Integration  
 
 ---
 
-## 🚀 Getting Started
+## 🎯 Use Cases
 
-```bash
-git clone https://github.com/yourusername/TechToolKitPro.git
-```
-
-1. Open `Tech_ToolKit_Pro.sln` in Visual Studio
-2. Restore NuGet packages
-3. Add COM reference: `Project → Add Reference → COM → Windows Update Agent API`
-4. Ensure `app.manifest` is set in Project Properties
-5. Build and run **as Administrator**
+- Fix common Windows errors  
+- Speed up slow PCs  
+- Perform routine system maintenance  
+- Diagnose system issues quickly  
+- Centralize multiple admin tools in one app  
 
 ---
 
-## 📁 Project Structure
+## 🏷️ Keywords (SEO)
 
-```
-Tech_ToolKit_Pro/
-├── Form1.cs                    Main shell with sidebar navigation
-├── AdminHelper.cs              Centralised admin rights management
-├── Program.cs                  Entry point
-├── app.manifest                UAC elevation manifest
-├── FormDashboard.cs
-├── FormDiskMaintenance.cs
-├── FormDiskSmart.cs
-├── FormTempCleanUp.cs
-├── FormUltraCleanUp.cs
-├── FormFlushDNS.cs
-├── FormMRTscan.cs
-├── FormDefenderScan.cs
-├── FormSmartScan.cs
-├── FormPointofRestoration.cs
-├── FormRecoveryFiles.cs
-├── FormWinBackUp.cs
-├── FormAppsUptates.cs
-├── FormShowUpdate.cs
-├── FormTaskList.cs
-├── FormUninstallApps.cs
-└── FormSystemReport.cs
-```
+Windows repair tool, PC optimization software, system maintenance utility, Windows troubleshooting toolkit, WPF desktop app, C# system tools, Windows performance booster
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome.  
+If you have ideas, improvements, or new tools to add:
+
+1. Fork the repo  
+2. Create a new branch  
+3. Submit a pull request  
 
 ---
 
 ## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## ⭐ Support
+
+If you find this project useful:
+
+- ⭐ Star the repository  
+- 🛠️ Share it with others  
+- 🧠 Contribute ideas or improvements  
+
+---
+
+## 🔥 Roadmap
+
+- [ ] UI/UX improvements  
+- [ ] More repair modules  
+- [ ] Plugin system  
+- [ ] Auto-update feature  
+- [ ] Advanced diagnostics  
+
+---
+
+## 👤 Author
+
+**Tah Lovet**  
+Building practical tools. No fluff. Just results.
 
 ---
 
@@ -108,4 +145,11 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ---
 
+## 💡 Final Note
+
+This isn’t just another toolkit.  
+It’s a growing platform designed to make Windows maintenance **faster, simpler, and more effective**.
+
 *Built with ❤️ using C# WinForms · Dark theme inspired by GitHub's dark mode*
+
+
