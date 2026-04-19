@@ -55,9 +55,9 @@ Get the latest version of **Tech ToolKit Pro**:
 
 ## 🖼️ Screenshots
 
-![Image alt](https://github.com/TLovet2325/Windows-Repair-Toolkit/blob/8853b9ac68e7bf159f2c0a35ed3f623514edc900/resize%204.png)
-![Image alt](https://github.com/TLovet2325/Windows-Repair-Toolkit/blob/8853b9ac68e7bf159f2c0a35ed3f623514edc900/resize%203.png)
-![Image alt](https://github.com/TLovet2325/Windows-Repair-Toolkit/blob/80ce5073539bd912e2eaaf3da356798080374aa8/resize%205.png)
+![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/81edfe6993419d3e27f71b0f9d9ec72006dff7c0/dashboard.png)
+![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/81edfe6993419d3e27f71b0f9d9ec72006dff7c0/Maintenance.png)
+![Image alt](https://github.com/TLovet2325/Tech-ToolKit-Pro/blob/81edfe6993419d3e27f71b0f9d9ec72006dff7c0/Security.png)
 
 ---
 
