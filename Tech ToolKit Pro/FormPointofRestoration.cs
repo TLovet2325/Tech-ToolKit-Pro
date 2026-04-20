@@ -552,7 +552,7 @@ namespace Tech_ToolKit_Pro
                     {
                         FileName = "cmd.exe",
                         Arguments = "/C vssadmin delete shadows /For=C: /Oldest /Quiet",
-                        UseShellExecute = true,
+                        UseShellExecute = false,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden,
                         CreateNoWindow = true
@@ -593,7 +593,7 @@ namespace Tech_ToolKit_Pro
                         Arguments = string.Format(
                             "-NoProfile -ExecutionPolicy Bypass -Command \"{0}\"",
                             command),
-                        UseShellExecute = true,
+                        UseShellExecute = false,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden,
                         CreateNoWindow = true
