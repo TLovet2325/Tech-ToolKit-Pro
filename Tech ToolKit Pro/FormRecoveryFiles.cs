@@ -393,12 +393,12 @@ namespace Tech_ToolKit_Pro
                             | AnchorStyles.Left | AnchorStyles.Right;
 
             fileList.Columns.Add("", 22);
-            fileList.Columns.Add("File Name", 200);
-            fileList.Columns.Add("Type", 60);
+            fileList.Columns.Add("File Name", 230);
+            fileList.Columns.Add("Type", 110);
             fileList.Columns.Add("Original Path", 220);
-            fileList.Columns.Add("Size", 74);
-            fileList.Columns.Add("Deleted On", 108);
-            fileList.Columns.Add("Source", 101);
+            fileList.Columns.Add("Size", 124);
+            fileList.Columns.Add("Deleted On", 158);
+            fileList.Columns.Add("Source", 152);
             fileList.Columns.Add("Recoverability", 110);
 
             fileList.DrawColumnHeader += DrawFileHeader;
@@ -450,10 +450,10 @@ namespace Tech_ToolKit_Pro
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            logList.Columns.Add("Time", 65);
-            logList.Columns.Add("File", 400);
-            logList.Columns.Add("Action", 101);
-            logList.Columns.Add("Result", 330);
+            logList.Columns.Add("Time", 115);
+            logList.Columns.Add("File", 450);
+            logList.Columns.Add("Action", 201);
+            logList.Columns.Add("Result", 360);
 
             logList.DrawColumnHeader += DrawLogHeader;
             logList.DrawItem += (s2, e2) => { };
@@ -473,7 +473,7 @@ namespace Tech_ToolKit_Pro
 
             lblStatus = new Label
             {
-                Text = "Select a drive and sources, then click Scan.",
+                Text = "Select a drive & sources, then click Scan.",
                 Font = new Font("Segoe UI", 8.5f),
                 ForeColor = C_SUB,
                 AutoSize = true

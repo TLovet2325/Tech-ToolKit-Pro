@@ -540,8 +540,8 @@ namespace Tech_ToolKit_Pro
             var s1 = ResolveShell("powercfg /h off", keepOpen: true);
             tools.Add(new DiskTool
             {
-                Title = "Disable Hibernation",
-                Subtitle = "powercfg /h off",
+                Title = "    Disable Hibernation",
+                Subtitle = "   powercfg /h off",
                 Icon = "💤",
                 Desc = "Turns off hibernation and deletes hiberfil.sys to reclaim disk space.",
                 Accent = C_BLUE,
@@ -556,8 +556,8 @@ namespace Tech_ToolKit_Pro
             var s2 = ResolveShell("echo Y | chkdsk C: /f /r /x", keepOpen: true);
             tools.Add(new DiskTool
             {
-                Title = "Check Disk (CHKDSK)",
-                Subtitle = "chkdsk C: /f /r /x",
+                Title = "    Check Disk (CHKDSK)",
+                Subtitle = "   chkdsk C: /f /r /x",
                 Icon = "🔍",
                 Desc = "Scans drive C: for file-system errors and bad sectors. May require reboot.",
                 Accent = C_AMBER,
@@ -586,8 +586,8 @@ namespace Tech_ToolKit_Pro
 
             tools.Add(new DiskTool
             {
-                Title = "SFC System Scan",
-                Subtitle = "sfc /scannow",
+                Title = "    SFC System Scan",
+                Subtitle = "   sfc /scannow",
                 Icon = "🛡",
                 Desc = "Validates protected Windows files and restores corrupted copies from cache.",
                 Accent = C_GREEN,
@@ -620,8 +620,8 @@ namespace Tech_ToolKit_Pro
 
             tools.Add(new DiskTool
             {
-                Title = "DISM Health Restore",
-                Subtitle = "CheckHealth → RestoreHealth",
+                Title = "    DISM Health Restore",
+                Subtitle = "   CheckHealth → RestoreHealth",
                 Icon = "🔧",
                 Desc = "Checks then repairs the Windows component store. Requires internet.",
                 Accent = C_PURPLE,
@@ -636,8 +636,8 @@ namespace Tech_ToolKit_Pro
             var s5 = ResolveShell("defrag C: /U /V", keepOpen: true);
             tools.Add(new DiskTool
             {
-                Title = "Optimize Drive",
-                Subtitle = "defrag C: /U /V",
+                Title = "    Optimize Drive",
+                Subtitle = "   defrag C: /U /V",
                 Icon = "⚡",
                 Desc = "Runs defrag or TRIM on drive C: depending on drive type.",
                 Accent = C_TEAL,
@@ -651,8 +651,8 @@ namespace Tech_ToolKit_Pro
             // ── 6. Clear Update Cache ─────────────────────────────────
             tools.Add(new DiskTool
             {
-                Title = "Clear Update Cache",
-                Subtitle = "Stop → Delete → Restart wuauserv",
+                Title = "    Clear Update Cache",
+                Subtitle = "   Stop → Delete → Restart wuauserv",
                 Icon = "🔄",
                 Desc = "Stops update services, clears the download cache, then restarts them.",
                 Accent = C_ORANGE,
@@ -674,8 +674,8 @@ namespace Tech_ToolKit_Pro
 
             tools.Add(new DiskTool
             {
-                Title = "Clear Event Logs",
-                Subtitle = "wevtutil cl System / App / Security",
+                Title = "    Clear Event Logs",
+                Subtitle = "   wevtutil cl System / App / Security",
                 Icon = "📋",
                 Desc = "Clears Windows System, Application and Security event logs.",
                 Accent = C_RED,
@@ -690,8 +690,8 @@ namespace Tech_ToolKit_Pro
             var s8 = ResolveShell("compact /CompactOS:always", keepOpen: true);
             tools.Add(new DiskTool
             {
-                Title = "Compact OS",
-                Subtitle = "compact /CompactOS:always",
+                Title = "    Compact OS",
+                Subtitle = "   compact /CompactOS:always",
                 Icon = "🗜",
                 Desc = "Compresses Windows OS files to save 1–3 GB on low-storage devices.",
                 Accent = C_TEAL,
@@ -705,8 +705,8 @@ namespace Tech_ToolKit_Pro
             // ── 9. Control Panel ──────────────────────────────────────
             tools.Add(new DiskTool
             {
-                Title = "Control Panel",
-                Subtitle = "control.exe",
+                Title = "    Control Panel",
+                Subtitle = "   control.exe",
                 Icon = "🖥",
                 Desc = "Opens the Windows Control Panel for system settings and hardware.",
                 Accent = C_BLUE,
@@ -904,9 +904,9 @@ namespace Tech_ToolKit_Pro
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            logList.Columns.Add("Time", 78);
-            logList.Columns.Add("Tool", 170);
-            logList.Columns.Add("Status", 100);
+            logList.Columns.Add("Time", 178);
+            logList.Columns.Add("Tool", 270);
+            logList.Columns.Add("Status", 200);
             logList.Columns.Add("Command / Note", 496);
 
             logList.DrawColumnHeader += DrawHeader;

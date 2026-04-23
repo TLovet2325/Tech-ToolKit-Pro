@@ -328,9 +328,9 @@ namespace Tech_ToolKit_Pro
                            | AnchorStyles.Left | AnchorStyles.Right;
 
             logList.Columns.Add("Status", 80);
-            logList.Columns.Add("Folder", 160);
-            logList.Columns.Add("File", 210);
-            logList.Columns.Add("Size", 80);
+            logList.Columns.Add("Folder", 260);
+            logList.Columns.Add("File", 310);
+            logList.Columns.Add("Size", 110);
             logList.Columns.Add("Path", 366);
 
             logList.DrawColumnHeader += DrawHeader;

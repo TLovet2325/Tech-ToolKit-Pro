@@ -395,9 +395,9 @@ namespace Tech_ToolKit_Pro
             };
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
-            logList.Columns.Add("Time", 70);
-            logList.Columns.Add("Event", 120);
-            logList.Columns.Add("Detail", 702);
+            logList.Columns.Add("Time", 170);
+            logList.Columns.Add("Event", 220);
+            logList.Columns.Add("Detail", 732);
             logList.DrawColumnHeader += DrawHeader;
             logList.DrawItem += (s, e) => { };
             logList.DrawSubItem += DrawRow;

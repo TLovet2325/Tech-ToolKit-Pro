@@ -308,12 +308,12 @@ namespace Tech_ToolKit_Pro
             appList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            appList.Columns.Add("Application", 320);
-            appList.Columns.Add("App ID", 190);
-            appList.Columns.Add("Current", 135);
-            appList.Columns.Add("Available", 95);
-            appList.Columns.Add("Source", 80);
-            appList.Columns.Add("Status", 76);
+            appList.Columns.Add("Application", 330);
+            appList.Columns.Add("App ID", 230);
+            appList.Columns.Add("Current", 165);
+            appList.Columns.Add("Available", 145);
+            appList.Columns.Add("Source", 130);
+            appList.Columns.Add("Status", 126);
 
             appList.DrawColumnHeader += DrawAppHeader;
             appList.DrawItem += (s, e) => { };

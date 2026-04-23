@@ -385,9 +385,9 @@ namespace Tech_ToolKit_Pro
                             | AnchorStyles.Left | AnchorStyles.Right;
 
             attrList.Columns.Add("Category", 100);
-            attrList.Columns.Add("Attribute", 120);
-            attrList.Columns.Add("Value", 270);
-            attrList.Columns.Add("Status", 86);
+            attrList.Columns.Add("Attribute", 220);
+            attrList.Columns.Add("Value", 370);
+            attrList.Columns.Add("Status", 116);
 
             attrList.DrawColumnHeader += DrawAttrHeader;
             attrList.DrawItem += (s, e) => { };

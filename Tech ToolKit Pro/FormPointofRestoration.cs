@@ -230,9 +230,9 @@ namespace Tech_ToolKit_Pro
                           | AnchorStyles.Left | AnchorStyles.Right;
 
             rpList.Columns.Add("Restore Point Name", 280);
-            rpList.Columns.Add("Date Created", 160);
-            rpList.Columns.Add("Type", 180);
-            rpList.Columns.Add("Sequence #", 264);
+            rpList.Columns.Add("Date Created", 260);
+            rpList.Columns.Add("Type", 280);
+            rpList.Columns.Add("Sequence #", 294);
 
             rpList.DrawColumnHeader += DrawHeader;
             rpList.DrawItem += (s, e) => { };

@@ -244,7 +244,7 @@ namespace Tech_ToolKit_Pro
             };
 
             lvSys = BuildListView(new[] { "Category", "Property", "Value" },
-                                  new[] { 160, 286, 429 });
+                                  new[] { 260, 386, 459 });
 
             lvSys.DrawColumnHeader += (s, e) => DrawLvHeader(e, C_BLUE);
             lvSys.DrawSubItem += (s, e) => DrawLvRow(e, lvSys, C_BLUE);
@@ -357,7 +357,7 @@ namespace Tech_ToolKit_Pro
             };
 
             lvHw = BuildListView(new[] { "Component", "Property", "Value" },
-                                 new[] { 160, 286, 429 });
+                                 new[] { 260, 386, 459 });
 
             lvHw.DrawColumnHeader += (s, e) => DrawLvHeader(e, C_GREEN);
             lvHw.DrawSubItem += (s, e) => DrawLvRow(e, lvHw, C_GREEN);

@@ -267,13 +267,13 @@ namespace Tech_ToolKit_Pro
 
             procList.Columns.Add("⚠", 24);
             procList.Columns.Add("Process", 170);
-            procList.Columns.Add("PID", 50);
-            procList.Columns.Add("RAM (MB)", 100);
-            procList.Columns.Add("RAM Bar", 140);
-            procList.Columns.Add("CPU %", 65);
-            procList.Columns.Add("Threads", 65);
+            procList.Columns.Add("PID", 100);
+            procList.Columns.Add("RAM (MB)", 150);
+            procList.Columns.Add("RAM Bar", 150);
+            procList.Columns.Add("CPU %", 115);
+            procList.Columns.Add("Threads", 115);
             procList.Columns.Add("Status", 100);
-            procList.Columns.Add("Note", 165);
+            procList.Columns.Add("Note", 185);
 
             procList.DrawColumnHeader += DrawProcHeader;
             procList.DrawItem += (s, e) => { };
@@ -323,10 +323,10 @@ namespace Tech_ToolKit_Pro
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            logList.Columns.Add("Time", 75);
-            logList.Columns.Add("Action", 130);
-            logList.Columns.Add("Process", 180);
-            logList.Columns.Add("PID", 79);
+            logList.Columns.Add("Time", 105);
+            logList.Columns.Add("Action", 180);
+            logList.Columns.Add("Process", 280);
+            logList.Columns.Add("PID", 129);
             logList.Columns.Add("Result", 432);
 
             logList.DrawColumnHeader += DrawLogHeader;

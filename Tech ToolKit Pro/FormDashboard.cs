@@ -205,12 +205,12 @@ namespace Tech_ToolKit_Pro
                             | AnchorStyles.Left | AnchorStyles.Right;
 
             // Columns
-            procView.Columns.Add("Process", 175);
-            procView.Columns.Add("PID", 150);
-            procView.Columns.Add("CPU %", 155);
-            procView.Columns.Add("RAM (MB)", 162);
-            procView.Columns.Add("Threads", 155);
-            procView.Columns.Add("Status", 82);
+            procView.Columns.Add("Process", 275);
+            procView.Columns.Add("PID", 175);
+            procView.Columns.Add("CPU %", 180);
+            procView.Columns.Add("RAM (MB)", 187);
+            procView.Columns.Add("Threads", 180);
+            procView.Columns.Add("Status", 112);
 
             procView.DrawColumnHeader += DrawHeader;
             procView.DrawItem += (s, e) => { };

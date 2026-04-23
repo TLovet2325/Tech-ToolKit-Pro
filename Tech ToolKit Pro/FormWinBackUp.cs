@@ -323,8 +323,8 @@ namespace Tech_ToolKit_Pro
 
             sourceList.Columns.Add("", 22);
             sourceList.Columns.Add("Path", 580);
-            sourceList.Columns.Add("Type", 160);
-            sourceList.Columns.Add("Size", 134);
+            sourceList.Columns.Add("Type", 280);
+            sourceList.Columns.Add("Size", 244);
 
             sourceList.DrawColumnHeader += DrawSourceHeader;
             sourceList.DrawItem += (s, e) => { };
@@ -506,8 +506,8 @@ namespace Tech_ToolKit_Pro
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            logList.Columns.Add("Time", 70);
-            logList.Columns.Add("Event", 120);
+            logList.Columns.Add("Time", 170);
+            logList.Columns.Add("Event", 250);
             logList.Columns.Add("Detail", 698);
 
             logList.DrawColumnHeader += DrawLogHeader;

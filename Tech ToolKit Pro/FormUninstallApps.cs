@@ -248,10 +248,10 @@ namespace Tech_ToolKit_Pro
 
             appList.Columns.Add("⚠", 22);
             appList.Columns.Add("Application", 380);
-            appList.Columns.Add("Version", 90);
-            appList.Columns.Add("Publisher", 170);
-            appList.Columns.Add("Install Date", 105);
-            appList.Columns.Add("Size", 112);
+            appList.Columns.Add("Version", 140);
+            appList.Columns.Add("Publisher", 220);
+            appList.Columns.Add("Install Date", 205);
+            appList.Columns.Add("Size", 142);
 
             appList.DrawColumnHeader += DrawAppHeader;
             appList.DrawItem += (s, e) => { };
@@ -301,10 +301,10 @@ namespace Tech_ToolKit_Pro
             logList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
                            | AnchorStyles.Left | AnchorStyles.Right;
 
-            logList.Columns.Add("Time", 95);
-            logList.Columns.Add("App", 400);
-            logList.Columns.Add("Action", 200);
-            logList.Columns.Add("Result", 201);
+            logList.Columns.Add("Time", 135);
+            logList.Columns.Add("App", 430);
+            logList.Columns.Add("Action", 280);
+            logList.Columns.Add("Result", 281);
 
             logList.DrawColumnHeader += DrawLogHeader;
             logList.DrawItem += (s2, e2) => { };
